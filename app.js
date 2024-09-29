@@ -1,15 +1,14 @@
-const express = require('express'); 
-const cors = require('cors'); 
-const artworkRoutes = require('./routes/artworkRoutes'); 
+const express = require("express");
+const cors = require("cors");
+const artworkRoutes = require("./routes/artworkRoutes");
 
 const app = express();
-
 
 app.use(cors());
 
 app.use(express.json());
 
-app.use('/api/artworks', artworkRoutes);
+app.use("/api/artworks", artworkRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
@@ -17,5 +16,3 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-
-
