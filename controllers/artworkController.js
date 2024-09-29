@@ -1,6 +1,6 @@
 const axios = require("axios");
 const { formatDate, extractArtistName } = require("../utils/helpers");
-
+//hardcoded , should get dynamically
 // Fetch 'featured' paintings from metapi
 async function getClevelandPaintings() {
   const cmaPaintingsIDs = ["1976.2", "1942.647", "1958.31"]; //cruci, burning houses, and vangogh

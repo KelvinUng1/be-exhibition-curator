@@ -1,15 +1,15 @@
 const axios = require("axios");
-const { extractArtistName } = require("../utils/helpers");
 
 const getBrowseArtworks = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 9;
+  const searchKeyword = req.query.search || ''; 
   const startIndex = (page - 1) * limit;
 
   try {
-    //fetch AIC artworks (public domain, paintings, on view) with pagination ----(just change to all or limit????decide.)
+    // fetch AIC artworks with pagination+search
     const aicCollectionResponse = await axios.get(
-      `https://api.artic.edu/api/v1/artworks/search?is_on_view=1&artwork_type_id=Painting&is_public_domain=true&limit=${limit}&page=${page}`
+      `https://api.artic.edu/api/v1/artworks/search?is_on_view=1&artwork_type_id=Painting&is_public_domain=true&limit=${limit}&page=${page}&q=${searchKeyword}`
     );
     const aicArtworkIds = aicCollectionResponse.data.data.map(
       (artwork) => artwork.id
@@ -29,12 +29,12 @@ const getBrowseArtworks = async (req, res) => {
       date: response.data.data.date_display || "Unknown Date",
     }));
 
-    // fetch CMA artowkrs (painting, with image)
+    // fetch CMA - pagination, painting, search keyword
     const cmaResponse = await axios.get(
       "https://openaccess-api.clevelandart.org/api/artworks/",
       {
         params: {
-          q: "painting",
+          q: `painting ${searchKeyword}`, 
           skip: startIndex,
           limit: limit,
           has_image: 1,
@@ -56,7 +56,7 @@ const getBrowseArtworks = async (req, res) => {
       description: artwork.description || "No description available",
     }));
 
-    // combine AIC and CMA
+    // combine AIC and CMA data
     res.json({
       page,
       limit,
