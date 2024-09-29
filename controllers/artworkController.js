@@ -1,64 +1,41 @@
 const axios = require('axios');
+const { formatDate, extractArtistName } = require('../utils/helpers');
 
-// helper function to format date
-function formatDate(date) {
-  // Replace / with dashes
-  let formattedDate = date.replace('/', '–').trim();
-
-  // "late 1903–early 1904" -> "ca. 1903–1904"
-  if (formattedDate.includes('late') || formattedDate.includes('early')) {
-    
-    const yearMatch = formattedDate.match(/(\d{4}).*(\d{4})/);
-    if (yearMatch) {
-      formattedDate = `${yearMatch[1]}–${yearMatch[2].slice(-2)}`; 
-    }
-  }
-
-  // shortened format ("1884–86")
-  if (formattedDate.match(/(\d{4})–(\d{4})/)) {
-    formattedDate = formattedDate.replace(/–(\d{2})/, '–$1'); 
-  }
-
-  return formattedDate;
-}
-
-
-// helper function to get only the artist's name
-function extractArtistName(artistString) {
-  return artistString.split('\n')[0].split('(')[0].trim();
-}
-
-// Fetch 'featured' paintings from MET API --- The Death of Socrates, Madonna and Child, Wheat Field with Cypresses
-async function getMetPaintings() {
-  const metPaintingsIDs = [436105, 438754, 436535]; 
+// Fetch 'featured' paintings from metapi
+async function getClevelandPaintings() {
+  const cmaPaintingsIDs = ['1976.2', '1942.647', '1958.31']; //cruci, burning houses, and vangogh
   try {
     const paintings = await Promise.all(
-      metPaintingsIDs.map(async (id) => {
+      cmaPaintingsIDs.map(async (id) => {
         const objectResponse = await axios.get(
-          `https://collectionapi.metmuseum.org/public/collection/v1/objects/${id}`
+          `https://openaccess-api.clevelandart.org/api/artworks/${id}`
         );
-        const artwork = objectResponse.data;
+        const artwork = objectResponse.data.data; // NEdd this to access the artwork ddata
 
         return {
-          id: artwork.objectID,
+          id: artwork.id,
           title: artwork.title || 'Untitled',
-          artist: artwork.artistDisplayName || 'Unknown Artist',
-          image_url: artwork.primaryImageSmall || '', 
-          date: formatDate(artwork.objectDate) || 'No date available', 
+          artist: artwork.creators && artwork.creators.length > 0
+            ? extractArtistName(artwork.creators[0].description)
+            : 'Unknown Artist',
+          image_url: artwork.images && artwork.images.web
+            ? artwork.images.web.url
+            : '', 
+          date: formatDate(artwork.creation_date) || 'No date available',
         };
       })
     );
 
     return paintings;
   } catch (error) {
-    console.error('Error fetching paintings from MET:', error.message);
-    throw new Error('Failed to fetch paintings from MET');
+    console.error('Error fetching paintings from Cleveland Museum of Art:', error.message);
+    throw new Error('Failed to fetch paintings from Cleveland Museum of Art');
   }
 }
 
-// Fetch 'featured' paintings from AIC API -> American Gothic, A Sunday on La Grande Jatte, The Old Guitarist
+// Fetch 'featured' paintings from aic api
 async function getArtInstitutePaintings() {
-  const aicPaintingsIDs = [6565, 27992, 28067]; // 
+  const aicPaintingsIDs = [6565, 27992, 28067]; // american gothic, la grande jatte and old guitarist 
   try {
     const paintings = await Promise.all(
       aicPaintingsIDs.map(async (id) => {
@@ -86,14 +63,14 @@ async function getArtInstitutePaintings() {
   }
 }
 
-// combin art from both APIs
+// Combine aic and cma APIs
 const getFeaturedArtworks = async (req, res) => {
   try {
-    const metPaintings = await getMetPaintings();
-    const artInstitutePaintings = await getArtInstitutePaintings();
+    const clevelandPaintings = await getClevelandPaintings(); 
+    const artInstitutePaintings = await getArtInstitutePaintings(); 
 
     res.status(200).json({
-      met: metPaintings,
+      clevelandMuseumArt: clevelandPaintings,
       artInstituteChicago: artInstitutePaintings,
     });
   } catch (error) {
@@ -102,3 +79,4 @@ const getFeaturedArtworks = async (req, res) => {
 };
 
 module.exports = { getFeaturedArtworks };
+
