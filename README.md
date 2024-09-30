@@ -28,7 +28,7 @@ This project is built with **JavaScript** and **Express**, with Axios for API re
 1. **Clone the repository:**
 
    ```
-   git clone https://github.com/YOUR_USERNAME/be-exhibition-curator.git
+   git clone https://github.com/KelvinUng1/be-exhibition-curator.git
 
    cd be-exhibition-curator
 2. **Install dependencies**
