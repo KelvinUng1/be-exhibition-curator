@@ -13,7 +13,20 @@ This is the backend for the **Exhibition Curator** project, providing an API tha
 
 This project is built with **JavaScript** and **Express**, with Axios for API requests, and is deployed on Render.
 
-- **[Access API here](https://be-exhibition-curator.onrender.com/api/artworks)**
+- **[Access API here](https://be-exhibition-curator.onrender.com/api/artworks/browse)**
+
+1. Fetch Featured Artworks<br>
+GET /api/artworks/featured<br>
+Fetch a list of featured artworks from multiple museums.
+
+2. Browse Artworks and Search Keyword<br>
+GET /api/artworks/browse<br>
+GET /api/artworks/browse?search=<keyword>&page=<pageNumber>&limit=<resultsPerPage><br>
+Search artworks by keyword with pagination.
+
+3. Fetch Artwork Details by ID and Source<br>
+GET /api/artworks/:source/:id<br>
+Fetch detailed information on a specific artwork.
 
 ## Setup instructions
 
